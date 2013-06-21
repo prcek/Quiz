@@ -21,5 +21,6 @@ def create_app(config_path):
 	database = Database(app)
 	import server 
 	server.init_db()
-
+	#server.load_db()
+	#print "load_db"
 	return app
