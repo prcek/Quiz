@@ -103,5 +103,8 @@ def load_db():
 def view():
     return render_template('index.html', text='hello!')
 
-
+@app.route("/q/<int:question_id>")
+def question(question_id):
+	question = Question.get(id=question_id)
+	return render_template('question.html', q=question )
 
