@@ -103,8 +103,17 @@ def load_db():
 def view():
     return render_template('index.html', text='hello!')
 
-@app.route("/q/<int:question_id>")
+@app.route("/q/<int:question_id>", methods=['GET', 'POST'])
 def question(question_id):
+
+	if request.method == 'POST':
+		print request.form
+		next = question_id+1
+		if next>6:
+			next=1
+		return redirect(url_for('question',question_id=next))
+
+
 	question = Question.get(id=question_id)
 	
 	q_no = 3

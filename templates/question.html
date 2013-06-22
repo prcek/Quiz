@@ -8,18 +8,25 @@
 	</div>
 	<hr/>
 	<div class="category">{{q.category.name}}</div>
-    <div class="question">{{q_no}}) {{ q.description }}</div>
+    <div class="question">{{q_no}}) {{ q.description }}<br><br>
+<pre>
+sdf iii
+sdf sdfsd
+</pre>a to</div>
 
+    <form method="POST" id="AnsForm">
+    <input type="hidden" name="qid" value="{{q.id}}">
+    <input type="hidden" name="skip" id="AnsSkip" value="False">
     {% for a in q.answers %}
 		<label class="radio">
-  			<input type="radio" name="optionsRadios" 
+  			<input type="radio" name="ansRadios" 
   				value="a_{{a.id}}" {% if a.selected %} checked {% endif%}>
   			{{ a.text }}
 		</label>
     {% endfor %}
-    <button class="btn" type="button">Ok</button>
-    <button class="btn" type="button">Přeskočit</button>
-
+    <button class="btn" type="button" id="BtnOk">Ok</button>
+    <button class="btn" type="button" id="BtnSkip">Přeskočit</button>
+	</form>
  
 {% endblock %}
 
@@ -56,8 +63,34 @@
 
     	}
 
+    	function is_ans() {
+    		return ($("input[name='ansRadios']:checked").length > 0);
+    	}
+
+    	function formsave() {
+    		$("#BtnOk").attr('disabled',true);
+    		$("input[name='ansRadios']").change(function(){
+				if (is_ans()) {
+					$("#BtnOk").removeAttr('disabled');
+				} else {
+					$("#BtnOk").attr('disabled',true);
+				}
+    		});
+
+
+    		$("#BtnOk").click(function(){
+    			$("#AnsForm").submit();
+    		});
+    		$("#BtnSkip").click(function(){
+    			$("#AnsSkip").val("True");
+    			$("#AnsForm").submit();
+    		});
+
+    	}
+
 		$(function() {
 			prepare_timer();
+			formsave();
   		});
   	
   	</script>
