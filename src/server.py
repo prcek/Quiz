@@ -33,6 +33,9 @@ class Question(BaseModel):
 	def get_short_desc(self):
 		return self.description
 
+	def get_desc(self):
+		return self.category.name + " " + self.description
+
 class Answer(BaseModel):
 	question = ForeignKeyField(Question, db_index=True,related_name='answers')
 	text = TextField()
@@ -48,6 +51,14 @@ class ExamTemplate(BaseModel):
 	def get_erase_url(self):
 		return url_for('exam_template_erase',exam_template_id=self.id)
 
+	def get_next_no(self):
+		m = 0
+		for q in self.questions:
+			if q.question_no>m:
+				m=q.question_no
+		return m+1
+	def get_questions(self):
+		return self.questions.order_by(ExamTemplateQuestion.question_no)
 
 
 class ExamTemplateQuestion(BaseModel):
@@ -57,6 +68,13 @@ class ExamTemplateQuestion(BaseModel):
 
 	class Meta:
 		order_by = ("question_no")
+
+	def get_category(self):
+		return self.question.category.name
+
+	def get_desc(self):
+		return self.question.get_desc()
+
  
 
 
@@ -160,14 +178,54 @@ def exam_templates():
 @app.route("/templates/<int:exam_template_id>", methods=['GET', 'POST'])
 def exam_template_edit(exam_template_id):
 	if request.method == 'POST':
-		t = ExamTemplate.get(id=exam_template_id)
-		t.name = request.form['desc']
-		t.max_time = request.form['max']
-		t.save()
-		return redirect(url_for('exam_templates'))
+		if request.form['action'] == 'D':
+			t = ExamTemplate.get(id=exam_template_id)
+			t.name = request.form['desc']
+			t.max_time = request.form['max']
+			t.save()
+		if request.form['action'] == 'A':
+			t = ExamTemplate.get(id=exam_template_id)
+			q = Question.get(id=request.form['qid'])
+			ti = ExamTemplateQuestion.create(exam_template=t, question_no=request.form['q_no'],question=q)
+			ti.save()
+			return redirect(url_for('exam_template_edit', exam_template_id=t.id))
+
+		if request.form['action'] == 'O':
+			t = ExamTemplate.get(id=exam_template_id)
+			for k in request.form.keys():
+				if k[0:4]=="qid_":
+					id = k[4:]
+					etq = ExamTemplateQuestion.get(id=id)
+					etq.question_no = request.form[k]
+					etq.save()
+
+			return redirect(url_for('exam_template_edit', exam_template_id=t.id))
+
+
+		if request.form['action'] == 'OC':
+			t = ExamTemplate.get(id=exam_template_id)
+			no = 1
+			for etq in t.questions:
+					etq.question_no = no
+					etq.save()
+					no = no + 1
+
+			return redirect(url_for('exam_template_edit', exam_template_id=t.id))
+
+
+		if request.form['action'] == 'DQ':
+			t = ExamTemplate.get(id=exam_template_id)
+
+			for i in request.form.getlist('q_check'):
+				etq = ExamTemplateQuestion.get(id=i)
+				etq.delete_instance()
+
+			return redirect(url_for('exam_template_edit', exam_template_id=t.id))
+
 
 	data = {
-		"t": ExamTemplate.get(id=exam_template_id)
+		"t": ExamTemplate.get(id=exam_template_id),
+		"all_questions": Question.select()
 	}
 	return render_template('template_edit.html',**data)
 

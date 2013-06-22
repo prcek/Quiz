@@ -2,16 +2,57 @@
 {% block content %}
 	<h1> Editace šablony testu  #{{t.id}}</h1>
 	<form method="POST" id="EditForm">
+		<input type="hidden" name="action" value="D"/>
 		<span class="input-append">
-			<input type="text" class="input-small" placeholder="Název" style="width:300px;" name="desc" value="{{t.name}}">
-  			<input type="number" class="input-small" placeholder="Max. čas" name="max" value="{{t.max_time}}">
+			<input type="text" class="input-small" placeholder="Název" style="width:300px;" name="desc" value="{{t.name}}"/>
+  			<input type="number" class="input-small" placeholder="Max. čas" name="max" value="{{t.max_time}}"/>
   			<button type="submit" class="btn" id="BtnSave">uložit</button>
   		</span>
 	</form>
 	<h2>Otázky v šabloně</h2>
 
+		<form method="POST">
+
+			<table class="table table-hover">
+			<thead>
+				<tr><th>#</th><th>kategorie</th><th>otázka</th><th></th></tr>
+			</thead>
+			<tbody>
+
+				{% for q in t.get_questions() %}
+				<tr>
+					<td><input type="number" class="input-small" name="qid_{{q.id}}" value="{{q.question_no}}"/></td>
+					<td>{{q.get_category()}}</td>
+					<td>{{q.get_desc()}}</td>
+					<td><input type="checkbox" class="input-small" name="q_check" value="{{q.id}}"/></td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+			</table>
+
+				<button type="submit" class="btn" id="BtnSaveQ" name="action" value="O">uložit pořadí</button>
+
+				<button type="submit" class="btn" id="BtnCorrect" name="action" value="OC">přepočítat pořadí</button>
+ 
+				<button type="submit" class="btn btn-danger" id="BtnDelQ" name="action" value="DQ">vyřadit označené</button>
+ 		</form>
 
 
+ 		<form method="POST">
+ 			<span class="input-append">
+ 				<input type="number" class="input-small" name="q_no" value="{{t.get_next_no()}}"/>
+				<select class="input-xxlarge" name="qid">
+					{% for q in all_questions %}
+					<option value="{{q.id}}">{{q.get_desc()}}</option>
+					{% endfor %}
+ 				</select>
+ 				<button type="submit" class="btn" id="BtnAddQ" name="action" value="A">přidat</button>
+ 			</span>
+ 		</form>
+
+ 	
+	<hr/>
 	<a href="{{t.get_erase_url()}}" class="btn btn-danger" id="BtnErase">smazat celou šablonu</a>
 
 {% endblock %}
