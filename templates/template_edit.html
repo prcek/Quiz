@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1> Editace šablony testu  #{{t.id}}</h1>
+	<form method="POST" id="EditForm">
+		<span class="input-append">
+			<input type="text" class="input-small" placeholder="Název" style="width:300px;" name="desc" value="{{t.name}}">
+  			<input type="number" class="input-small" placeholder="Max. čas" name="max" value="{{t.max_time}}">
+  			<button type="submit" class="btn" id="BtnSave">uložit</button>
+  		</span>
+	</form>
+	<h2>Otázky v šabloně</h2>
+
+
+
+	<a href="{{t.get_erase_url()}}" class="btn btn-danger" id="BtnErase">smazat celou šablonu</a>
+
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+    <script type="text/javascript">
+		$(function() {
+			$("#BtnSave").click(function(){
+				if ($("input[name='desc']").val() == '') {
+					blink("input[name='desc']",3);
+					return false;
+    			}	
+    			if ($("input[name='max']").val() == '') {
+					blink("input[name='max']",3);
+					return false;
+    			}	
+			});
+
+			$("#BtnErase").click(function(){
+				return confirm("Opravdu smazat celou šablonu?");
+			});
+		});
+
+	</script>
+{% endblock %}

@@ -27,12 +27,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Project name</a>
+          <a class="brand" href="/">Quiz</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><a href="/templates">Šablony</a></li>
+              <li><a href="/questions">Otázky</a></li>
+              <li><a href="/tests">Testy</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -51,6 +51,17 @@
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 {% block script %}
       <script type="text/javascript">
+
+      function blink(selector, c){
+        if (c<=0) return
+        $(selector).fadeOut(100, function(){
+            $(this).fadeIn(100, function(){
+              blink(this,c-1);
+            });
+        });
+      }
+
+
       $(function() {
       });
       </script>

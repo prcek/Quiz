@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Přehled šablon testů</h1>
+	<table class="table table-hover">
+	<thead>
+		<tr><th>#</th><th>Název</th><th>čas</th><th></th></tr>
+	</thead>
+	<tbody>
+		{% for t in list %}
+		<tr>
+			<td>{{t.id}}</td><td>{{t.name}}</td><td>{{t.max_time}}</td>
+			<td><a class="btn btn-small" href="{{t.get_edit_url()}}">Editovat</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	</table>
+
+	<form method="POST" id="AddForm">
+		<span class="input-append">
+			<input type="text" class="input-small" placeholder="Název" style="width:300px;" name="desc">
+  			<input type="number" class="input-small" placeholder="Max. čas" name="max">
+  			<button type="submit" class="btn" id="BtnCreate">založit</button>
+  		</span>
+	</form>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+    <script type="text/javascript">
+
+
+
+		$(function() {
+			$("#BtnCreate").click(function(){
+				if ($("input[name='desc']").val() == '') {
+					blink("input[name='desc']",3);
+					return false;
+    			}	
+    			if ($("input[name='max']").val() == '') {
+					blink("input[name='max']",3);
+					return false;
+    			}	
+
+			});
+		});
+
+	</script>
+{% endblock %}

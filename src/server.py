@@ -30,13 +30,39 @@ class Question(BaseModel):
 	category = ForeignKeyField(Category,db_index=True,related_name='questions')
 	description = TextField()
 
+	def get_short_desc(self):
+		return self.description
+
 class Answer(BaseModel):
 	question = ForeignKeyField(Question, db_index=True,related_name='answers')
 	text = TextField()
 	correct = BooleanField(default=False)
 
+class ExamTemplate(BaseModel):
+	name = CharField()
+	max_time = IntegerField()
+
+	def get_edit_url(self):
+		return url_for('exam_template_edit',exam_template_id=self.id)
+
+	def get_erase_url(self):
+		return url_for('exam_template_erase',exam_template_id=self.id)
+
+
+
+class ExamTemplateQuestion(BaseModel):
+	exam_template = ForeignKeyField(ExamTemplate, db_index=True, related_name='questions')
+	question_no = IntegerField(db_index=True)
+	question = ForeignKeyField(Question,db_index=True)
+
+	class Meta:
+		order_by = ("question_no")
+ 
+
+
 class Exam(BaseModel):
 	applicant = TextField()
+	exam_template = ForeignKeyField(ExamTemplate, db_index=True, related_name='exams')
 	exam_start = DateTimeField()
 	exam_stop = DateTimeField()
 
@@ -47,7 +73,7 @@ class ExamAnswer(BaseModel):
 
 
 
-ALL_MODELS = [Category,Question,Answer,Exam,ExamAnswer]
+ALL_MODELS = [Category,Question,Answer,Exam,ExamAnswer,ExamTemplate, ExamTemplateQuestion]
 
 def init_db():
     for m in ALL_MODELS:
@@ -94,14 +120,63 @@ def load_db():
 	a2q3.save()
 
 
-	pass        
+	et1 = ExamTemplate.create(name='examtempl1',max_time=60) 
+	et1.save()
+
+	et2 = ExamTemplate.create(name='examtempl2',max_time=125) 
+	et2.save()
+
+
+	etq=ExamTemplateQuestion.create(exam_template=et1, question_no=1, question=q1)
+	etq.save()
+	etq=ExamTemplateQuestion.create(exam_template=et1, question_no=2, question=q2)
+	etq.save()
+	etq=ExamTemplateQuestion.create(exam_template=et1, question_no=3, question=q3)
+	etq.save()
+
+	etq=ExamTemplateQuestion.create(exam_template=et2, question_no=1, question=q1)
+	etq.save()
 
 
 ##### VIEWS #####
 
+
+
 @app.route("/")
 def view():
     return render_template('index.html', text='hello!')
+
+@app.route("/templates", methods=['GET','POST'])
+def exam_templates():
+	if request.method == 'POST':
+		t = ExamTemplate.create(name=request.form['desc'],max_time=request.form['max']);
+		t.save()
+		return redirect(url_for('exam_template_edit',exam_template_id=t.id))
+	data = {
+		"list":ExamTemplate.select()
+	}
+	return render_template('templates.html',**data)
+
+@app.route("/templates/<int:exam_template_id>", methods=['GET', 'POST'])
+def exam_template_edit(exam_template_id):
+	if request.method == 'POST':
+		t = ExamTemplate.get(id=exam_template_id)
+		t.name = request.form['desc']
+		t.max_time = request.form['max']
+		t.save()
+		return redirect(url_for('exam_templates'))
+
+	data = {
+		"t": ExamTemplate.get(id=exam_template_id)
+	}
+	return render_template('template_edit.html',**data)
+
+@app.route("/templates/erase/<int:exam_template_id>")
+def exam_template_erase(exam_template_id):
+	t =  ExamTemplate.get(id=exam_template_id)
+	t.delete_instance()
+	return redirect(url_for('exam_templates'))
+
 
 @app.route("/q/<int:question_id>", methods=['GET', 'POST'])
 def question(question_id):
