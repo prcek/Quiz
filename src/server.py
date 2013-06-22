@@ -45,6 +45,9 @@ class ExamTemplate(BaseModel):
 	name = CharField()
 	max_time = IntegerField()
 
+	def get_start_url(self):
+		return url_for('exam_start', exam_template_id=self.id)
+
 	def get_edit_url(self):
 		return url_for('exam_template_edit',exam_template_id=self.id)
 
@@ -162,7 +165,10 @@ def load_db():
 
 @app.route("/")
 def view():
-    return render_template('index.html', text='hello!')
+	data = {
+		"exam_templates":ExamTemplate.select(),
+	}
+	return render_template('index.html', **data)
 
 @app.route("/templates", methods=['GET','POST'])
 def exam_templates():
@@ -234,6 +240,11 @@ def exam_template_erase(exam_template_id):
 	t =  ExamTemplate.get(id=exam_template_id)
 	t.delete_instance()
 	return redirect(url_for('exam_templates'))
+
+
+@app.route("/exam_start/<int:exam_template_id>")
+def exam_start(exam_template_id):
+	return ""
 
 
 @app.route("/q/<int:question_id>", methods=['GET', 'POST'])

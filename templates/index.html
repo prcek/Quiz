@@ -1,4 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-      <h1 class="alert">{{ text }}</h1>
+	{% for t in exam_templates %}
+    <h1><a href="{{t.get_start_url()}}" class="btn btn-large">Spustit</a>&nbsp;{{ t.name }}</h1>
+    {% endfor %}
 {% endblock %}
