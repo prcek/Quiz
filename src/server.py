@@ -205,7 +205,7 @@ def exam_template_edit(exam_template_id):
 		if request.form['action'] == 'OC':
 			t = ExamTemplate.get(id=exam_template_id)
 			no = 1
-			for etq in t.questions:
+			for etq in t.questions.order_by(ExamTemplateQuestion.question_no):
 					etq.question_no = no
 					etq.save()
 					no = no + 1
