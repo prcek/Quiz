@@ -1,4 +1,64 @@
 {% extends "base.html" %}
 {% block content %}
-      <p>{{ q.description }}</p>
+	<div>Celkem {{q_total}} otázek</div>
+	<div>Celkový čas {{t_total}}</div>
+	<div>Zůstatek času <span class="time" time={{t_left}}></span></div>
+	<div class="progress">
+  		<div class="bar bar-success" style="width: {{((q_no*100) / q_total)|round|int}}%;"></div>
+	</div>
+	<hr/>
+	<div class="category">{{q.category.name}}</div>
+    <div class="question">{{q_no}}) {{ q.description }}</div>
+
+    {% for a in q.answers %}
+		<label class="radio">
+  			<input type="radio" name="optionsRadios" 
+  				value="a_{{a.id}}" {% if a.selected %} checked {% endif%}>
+  			{{ a.text }}
+		</label>
+    {% endfor %}
+    <button class="btn" type="button">Ok</button>
+    <button class="btn" type="button">Přeskočit</button>
+
+ 
+{% endblock %}
+
+{% block script %}
+  {{ super() }}
+    	<script type="text/javascript">
+    	function pad(n) {
+    		return (n < 10) ? ("0" + n) : n;
+		}
+    	function timeformat(t){
+    		var hours = Math.floor(t/(3600));
+    		var minutes = Math.floor( (t-hours*3600)/60);
+    		var seconds = t-hours*3600-minutes*60;
+    		return pad(hours)+":"+pad(minutes)+":"+pad(seconds); 
+    	}
+
+    	function prepare_timer(){
+			var timeout = 1000;
+			var timer;
+
+			var t = $(".time").attr("time");
+			$(".time").text(timeformat(t));
+			
+			timer = $.timer(timeout, function() {
+					var t = $(".time").attr("time");
+					t=t-1;
+					$(".time").attr("time",t);
+					$(".time").text(timeformat(t));
+				
+					if (t<=0) {
+						timer.stop();
+					}	
+			});
+
+    	}
+
+		$(function() {
+			prepare_timer();
+  		});
+  	
+  	</script>
 {% endblock %}

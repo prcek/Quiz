@@ -106,5 +106,18 @@ def view():
 @app.route("/q/<int:question_id>")
 def question(question_id):
 	question = Question.get(id=question_id)
-	return render_template('question.html', q=question )
+	
+	q_no = 3
+	q_total = 20
+	t_total = "00:06:10"
+	t_left  = 10
+
+	data = {
+		"q":question,
+		"q_no":q_no,
+		"q_total":q_total,
+		"t_total":t_total,
+		"t_left":t_left,
+	}
+	return render_template('question.html', **data)
 
