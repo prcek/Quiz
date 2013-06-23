@@ -26,9 +26,20 @@ class BaseModel(database.Model):
 class Category(BaseModel):
 	name =  CharField()
 
+	def is_empty(self):
+		return len([t for t in self.questions])==0
+
 class Question(BaseModel):
 	category = ForeignKeyField(Category,db_index=True,related_name='questions')
 	description = TextField()
+
+	def is_used_in_template(self):
+		return len([t for t in self.templates])>0
+
+	def get_edit_url(self):
+		return url_for('question_edit',question_id=self.id)
+	def get_questions_table_url(self):
+		return url_for('questions', category_id=self.category.id)
 
 	def get_short_desc(self):
 		return self.description
@@ -40,6 +51,9 @@ class Answer(BaseModel):
 	question = ForeignKeyField(Question, db_index=True,related_name='answers')
 	text = TextField()
 	correct = BooleanField(default=False)
+
+	def get_desc(self):
+		return self.text
 
 class ExamTemplate(BaseModel):
 	name = CharField()
@@ -67,7 +81,7 @@ class ExamTemplate(BaseModel):
 class ExamTemplateQuestion(BaseModel):
 	exam_template = ForeignKeyField(ExamTemplate, db_index=True, related_name='questions')
 	question_no = IntegerField(db_index=True)
-	question = ForeignKeyField(Question,db_index=True)
+	question = ForeignKeyField(Question,db_index=True, related_name='templates')
 
 	class Meta:
 		order_by = ("question_no")
@@ -189,6 +203,7 @@ def exam_template_edit(exam_template_id):
 			t.name = request.form['desc']
 			t.max_time = request.form['max']
 			t.save()
+			return redirect(url_for('exam_templates'))
 		if request.form['action'] == 'A':
 			t = ExamTemplate.get(id=exam_template_id)
 			q = Question.get(id=request.form['qid'])
@@ -240,6 +255,76 @@ def exam_template_erase(exam_template_id):
 	t =  ExamTemplate.get(id=exam_template_id)
 	t.delete_instance()
 	return redirect(url_for('exam_templates'))
+
+
+@app.route("/questions")
+@app.route("/questions/<int:category_id>", methods=['GET','POST'])
+def questions(category_id=None):
+	if category_id == None:
+		return redirect(url_for('questions', category_id=Category.get().id))
+
+	if request.method == 'POST':
+		if request.form['action'] == 'NC':
+			return redirect(url_for('questions', category_id=request.form['new_cat']))
+		if request.form['action'] == 'NQ':
+			category = Category.get(id=category_id)
+			q=Question.create(category=category)
+			q.save()
+			return redirect(url_for('question_edit',question_id=q.id))
+
+
+	category = Category.get(id=category_id)
+
+	data = {
+		"category": category,
+		"categories": Category.select(),
+		"questions": category.questions,
+	}
+
+
+	return render_template('questions.html',**data)
+
+@app.route("/question/<int:question_id>", methods=["GET","POST"])
+def question_edit(question_id):
+
+	question = Question.get(id=question_id)
+	alert = None
+
+	if request.method == 'POST':
+		if request.form['action']=='A':
+			question.description = request.form['desc']
+			question.save()
+			a = Answer.create(question=question)
+			a.save()
+		if request.form['action']=='S':
+			question.description = request.form['desc']
+			question.save()
+			correct_id = request.form['ansRadios']
+			for k in request.form.keys():
+				if k[0:2]=="a_":
+					id = k[2:]
+					val = request.form[k]
+					cor = id == correct_id
+					ans = Answer.get(id = id)
+					if val == '':
+						ans.delete_instance()
+					else:
+						ans.correct=cor
+						ans.text=val
+						ans.save()
+		if request.form['action']=='D':
+			if question.is_used_in_template():
+				alert = u"Nelze smazat, otázka je použitá v sabloně"
+			else:
+				question.delete_instance()
+				return redirect(url_for('questions', category_id=question.category.id))									
+
+	data = {
+		"alert":alert,
+		"q": question,
+	}
+	return render_template('question_edit.html',**data)
+
 
 
 @app.route("/exam_start/<int:exam_template_id>")

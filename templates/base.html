@@ -32,6 +32,7 @@
             <ul class="nav">
               <li><a href="/templates">Šablony</a></li>
               <li><a href="/questions">Otázky</a></li>
+              <li><a href="/cats">Kategorie</a></li>
               <li><a href="/tests">Testy</a></li>
             </ul>
           </div><!--/.nav-collapse -->
@@ -41,6 +42,10 @@
 
 
     <div class="container">
+  {% if alert %}
+  <div class='alert'>{{alert}}</div>
+  {% endif %}
+
 {% block content %}
 {% endblock %}
     </div> <!-- /container -->

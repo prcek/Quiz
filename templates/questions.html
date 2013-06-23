@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+		<h1> Přehled otázek </h1>
+
+		<h3>Kategorie</h3>
+ 		<form method="POST">
+ 			<span class="input-append">
+ 				<select class="input-xxlarge" name="new_cat">
+					{% for c in categories %}
+					<option value="{{c.id}}" {% if c.id == category.id %}selected{% endif %} >{{c.name}}</option>
+					{% endfor %}
+ 				</select>
+ 				<button type="submit" class="btn" id="BtnChange" name="action" value="NC">změnit</button>
+ 			</span>
+ 		</form>
+
+ 		<h3>Otázky</h3>
+
+			<table class="table table-hover">
+			<thead>
+				<tr><th>#</th><th>otázka</th><th>odpovědi</th><th></th></tr>
+			</thead>
+			<tbody>
+
+				{% for q in questions %}
+				<tr>
+					<td>{{q.id}}</td>
+					<td>{{q.get_short_desc()}}</td>
+					<td>{% for a in q.answers %}
+						<div>{{ a.get_desc() }}</div>
+						{% endfor %}</td>
+					<td><a href="{{q.get_edit_url()}}"class="btn btn-small">editovat</a></td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+			</table>
+
+ 		<form method="POST">
+ 			<button type="submit" class="btn" id="BtnNew" name="action" value="NQ">založit otázku</button>
+ 		</form>
+
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+      </script>
+{% endblock %} 

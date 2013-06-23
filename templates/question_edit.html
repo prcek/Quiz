@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Editace otázky</h1>
+
+
+	<form method="POST">
+		<textarea name="desc" class="input-xxlarge" rows="3">{{q.description}}</textarea><br>
+		{% for a in q.answers %}
+		<span class="input-append">
+  			<input type="radio" name="ansRadios" value="{{a.id}}" {% if a.correct %} checked {% endif%}>
+			<input type="text" class="input-xxlarge" placeholder="odpověď" name="a_{{a.id}}" value="{{a.text}}">
+		</span>
+		{% endfor %}
+		<br>
+		<button type="submit" class="btn" id="BtnSaveQ" name="action" value="S">uložit</button>
+		<button type="submit" class="btn" id="BtnNewA" name="action" value="A">přidat odpověď</button>
+		<button type="submit" class="btn btn-danger" id="BtnDelQ" name="action" value="D">smazat otázku</button>
+
+	</form>
+
+
+	<a href="{{q.get_questions_table_url()}}" class="btn">zpět na seznam</a>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+      </script>
+{% endblock %} 
