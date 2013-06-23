@@ -381,12 +381,12 @@ def exam_start(exam_template_id):
 @app.route("/q_preview/<int:question_id>", methods=['GET', 'POST'])
 def question_preview(question_id):
 
-	if request.method == 'POST':
-		print request.form
-		next = question_id+1
-		if next>6:
-			next=1
-		return redirect(url_for('question',question_id=next))
+#	if request.method == 'POST':
+#		print request.form
+#		next = question_id+1
+#		if next>6:
+#			next=1
+#		return redirect(url_for('question',question_id=next))
 
 
 	question = Question.get(id=question_id)

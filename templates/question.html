@@ -8,12 +8,9 @@
 	</div>
 	<hr/>
 	<div class="category">{{q.category.name}}</div>
-    <div class="question">{{q_no}}) {{ q.description }}<br><br>
-<pre>
-sdf iii
-sdf sdfsd
-</pre>a to</div>
-
+    <div>&nbsp;</div>
+    <div class="question">{{ q.description|safe }}</div>
+    <div>&nbsp;</div>
     <form method="POST" id="AnsForm">
     <input type="hidden" name="qid" value="{{q.id}}">
     <input type="hidden" name="skip" id="AnsSkip" value="False">
@@ -21,12 +18,14 @@ sdf sdfsd
 		<label class="radio">
   			<input type="radio" name="ansRadios" 
   				value="a_{{a.id}}" {% if a.selected %} checked {% endif%}>
-  			{{ a.text }}
+  			{{ a.text|safe }}
 		</label>
     {% endfor %}
     <button class="btn" type="button" id="BtnOk">Ok</button>
     <button class="btn" type="button" id="BtnSkip">Přeskočit</button>
 	</form>
+    <div>&nbsp;</div>
+    <hr/>
  
 {% endblock %}
 
