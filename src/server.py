@@ -123,6 +123,8 @@ class Exam(BaseModel):
 
 	def get_key(self):
 		return self.shash+"_"+self.id
+	def get_start_url(self):
+		return url_for('exam_start',exam_shash=self.shash)
 
 	def get_result(self):
 		return "%d/%d" % (self.question_correct,self.question_count)
@@ -447,15 +449,30 @@ def exam_create(exam_template_id):
 	return render_template('exam_create.html',**data)
 
 
-@app.route("/exam_start/<exam_shash>")
+@app.route("/exam_start/<exam_shash>", methods=['POST','GET'])
 def exam_start(exam_shash):
 	e = Exam.get(shash=exam_shash)
+
+	if request.method == 'POST':
+		if request.form['action']=='S':
+			e.exam_start = datetime.datetime.now()
+			e.exam_stop = e.exam_start+datetime.timedelta(minutes=e.exam_template.max_time)
+			e.cursor = 0
+			e.save()
+			return redirect(url_for('exam_step',exam_shash=e.shash))
+
+
+
 	data = {
 		"e": e,
 	}
 	return render_template('exam_start.html',**data)
 
+@app.route("/exam_step/<exam_shash>", methods=['POST','GET'])
+def exam_step(exam_shash):
+	e = Exam.get(shash=exam_shash)
 
+	return "exam step"
 
 
 

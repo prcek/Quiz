@@ -16,7 +16,8 @@
 					<td>{{e.exam_template.name}}</td>
 					<td>{{e.get_result()}}</td>
 					<td>
-						<a href="{{e.get_detail_url()}}"class="btn btn-small">detail</a>
+						<a href="{{e.get_detail_url()}}" class="btn btn-small">detail</a>
+						<a href="{{e.get_start_url()}}" class="btn btn-small">znovu spuštění</a>
 					</td>
 				</tr>
 				{% endfor %}
