@@ -41,6 +41,9 @@ class Question(BaseModel):
 	def is_used_in_template(self):
 		return len([t for t in self.templates])>0
 
+	def get_preview_url(self):
+		return url_for('question_preview',question_id=self.id)
+
 	def get_edit_url(self):
 		return url_for('question_edit',question_id=self.id)
 	def get_questions_table_url(self):
@@ -375,8 +378,8 @@ def exam_start(exam_template_id):
 	return ""
 
 
-@app.route("/q/<int:question_id>", methods=['GET', 'POST'])
-def question(question_id):
+@app.route("/q_preview/<int:question_id>", methods=['GET', 'POST'])
+def question_preview(question_id):
 
 	if request.method == 'POST':
 		print request.form

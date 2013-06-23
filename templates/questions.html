@@ -29,7 +29,10 @@
 					<td>{% for a in q.answers %}
 						<div>{{ a.get_desc() }}</div>
 						{% endfor %}</td>
-					<td><a href="{{q.get_edit_url()}}"class="btn btn-small">editovat</a></td>
+					<td>
+						<a href="{{q.get_edit_url()}}"class="btn btn-small">editovat</a>
+						<a href="{{q.get_preview_url()}}"class="btn btn-small">náhled</a>
+					</td>
 				</tr>
 				{% endfor %}
 
