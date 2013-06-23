@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1> Editace kategorie #{{category.id}}</h1>
+	<form method='POST'>
+		<span class="input-append">
+			<input type="text" class="input-xxlarge" placeholder="název kategorie" name="cat_name" value="{{category.name}}">
+			<button type="submit" class="btn" id="BtnSaveC" name="action" value="S">uložit</button>
+
+		</span><br>
+			<button type="submit" class="btn btn-danger" id="BtnDelC" name="action" value="D">smazat</button>
+
+	</form>
+
+
+
+	<a href="/categories" class="btn">zpět na seznam</a>
+
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+      </script>
+{% endblock %} 

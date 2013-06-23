@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Přehled kategorií</h1>
+
+			<table class="table table-hover">
+			<thead>
+				<tr><th>#</th><th>název</th><th></th></tr>
+			</thead>
+			<tbody>
+
+				{% for c in categories %}
+				<tr>
+					<td>{{c.id}}</td>
+					<td>{{c.name}}</td>
+					<td>
+						<a href="{{c.get_edit_url()}}"class="btn btn-small">editovat</a>
+						<a href="{{c.get_questions_table_url()}}"class="btn btn-small">otázky</a>
+					</td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+			</table>
+
+ 		<form method="POST">
+ 			<button type="submit" class="btn" id="BtnNew" name="action" value="NC">založit kategorii</button>
+ 		</form>
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+      </script>
+{% endblock %} 

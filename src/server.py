@@ -28,6 +28,11 @@ class Category(BaseModel):
 
 	def is_empty(self):
 		return len([t for t in self.questions])==0
+	def get_edit_url(self):
+		return url_for('category_edit',category_id=self.id)
+	def get_questions_table_url(self):
+		return url_for('questions', category_id=self.id)
+
 
 class Question(BaseModel):
 	category = ForeignKeyField(Category,db_index=True,related_name='questions')
@@ -324,6 +329,44 @@ def question_edit(question_id):
 		"q": question,
 	}
 	return render_template('question_edit.html',**data)
+
+
+@app.route("/categories",methods=['POST','GET'])
+def categories():
+	if request.method == 'POST':
+		if request.form['action']=='NC':
+			c = Category.create()
+			c.save()
+			return redirect(url_for('category_edit',category_id=c.id))
+
+	data = {
+		"categories": Category.select()
+	}
+	return render_template('categories.html', **data)
+
+@app.route("/category/<int:category_id>",methods=['POST','GET'])
+def category_edit(category_id):
+	alert = None
+	cat = Category.get(id=category_id)
+
+	if request.method == "POST":
+		if request.form['action']=='S':
+			cat.name = request.form['cat_name']
+			cat.save()
+			return redirect(url_for('categories'))
+		if request.form['action']=='D':
+			if cat.is_empty():
+				cat.delete_instance()
+				return redirect(url_for('categories'))
+			else:
+				alert = u'Nelze smazat, kategorie není prázdná'
+
+
+	data = {
+		"alert": alert,
+		"category": cat
+	}
+	return render_template('category_edit.html', **data)
 
 
 
