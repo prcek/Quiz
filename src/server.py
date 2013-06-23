@@ -11,6 +11,7 @@ import wtforms
 import getpass
 import json
 import urllib
+import os
 
 from index import app
 from index import database
@@ -67,8 +68,8 @@ class ExamTemplate(BaseModel):
 	name = CharField()
 	max_time = IntegerField()
 
-	def get_start_url(self):
-		return url_for('exam_start', exam_template_id=self.id)
+	def get_exam_create_url(self):
+		return url_for('exam_create', exam_template_id=self.id)
 
 	def get_edit_url(self):
 		return url_for('exam_template_edit',exam_template_id=self.id)
@@ -104,15 +105,40 @@ class ExamTemplateQuestion(BaseModel):
 
 
 class Exam(BaseModel):
-	applicant = TextField()
 	exam_template = ForeignKeyField(ExamTemplate, db_index=True, related_name='exams')
-	exam_start = DateTimeField()
-	exam_stop = DateTimeField()
+	shash = CharField(db_index=True)
+	applicant = TextField()
+	exam_created = DateTimeField(default=datetime.datetime.now)
+	exam_start = DateTimeField(null=True)
+	exam_stop = DateTimeField(null=True)
+	last_answer_time = DateTimeField(null=True)
+	cursor = IntegerField()
+	closed = BooleanField(default=False)
+	question_count = IntegerField(null=True)
+	question_correct = IntegerField(null=True)
+	question_wrong = IntegerField(null=True)
+
+	def get_date(self):
+		return self.exam_created.strftime("%Y-%m-%d %H:%M")
+
+	def get_key(self):
+		return self.shash+"_"+self.id
+
+	def get_result(self):
+		return "%d/%d" % (self.question_correct,self.question_count)
+
+	def get_detail_url(self):
+		return url_for('exam_detail',exam_id=self.id)
+
 
 class ExamAnswer(BaseModel):
+	no = IntegerField()
 	exam = ForeignKeyField(Exam, db_index=True, related_name='answers')
 	question = ForeignKeyField(Question, db_index=True)
 	answer = ForeignKeyField(Answer, null=True)
+	question_text = TextField()
+	answer_text = TextField()
+	answer_correct = BooleanField(default=False)
 
 
 
@@ -371,11 +397,66 @@ def category_edit(category_id):
 	}
 	return render_template('category_edit.html', **data)
 
+@app.route("/exams")
+def exam_list():
+	data = {
+		"exams": Exam.select().order_by(-Exam.exam_created),
+	}
+	return render_template('exams.html',**data)
 
-
-@app.route("/exam_start/<int:exam_template_id>")
-def exam_start(exam_template_id):
+@app.route("/exam/<int:exam_id>")
+def exam_detail(exam_id):
 	return ""
+
+@app.route("/exam_create/<int:exam_template_id>", methods=['GET', 'POST'])
+def exam_create(exam_template_id):
+
+
+
+	et = ExamTemplate.get(id = exam_template_id)
+
+	if request.method == 'POST':
+		ex = Exam.create(exam_template=exam_template_id)
+		ex.applicant = request.form['applicant']
+		ex.exam_created = datetime.datetime.now()
+		ex.cursor = 0
+		ex.save()
+		ex.shash = os.urandom(16).encode('hex')+"_%d" % ex.id
+		ex.save()
+
+
+		no = 0
+		for qi in et.get_questions():
+			no+=1
+			ea = ExamAnswer(exam=ex,question=qi.question,no=no)
+			ea.save()
+
+		ex.question_count = no
+		ex.question_correct = 0
+		ex.question_wrong = 0
+		ex.save()
+
+
+		return redirect(url_for('exam_start',exam_shash=ex.shash))
+
+	data = {
+		"et":et,
+	}
+
+
+	return render_template('exam_create.html',**data)
+
+
+@app.route("/exam_start/<exam_shash>")
+def exam_start(exam_shash):
+	e = Exam.get(shash=exam_shash)
+	data = {
+		"e": e,
+	}
+	return render_template('exam_start.html',**data)
+
+
+
 
 
 @app.route("/q_preview/<int:question_id>", methods=['GET', 'POST'])
@@ -404,4 +485,7 @@ def question_preview(question_id):
 		"t_left":t_left,
 	}
 	return render_template('question.html', **data)
+
+
+
 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 	{% for t in exam_templates %}
-    <h1><a href="{{t.get_start_url()}}" class="btn btn-large">Spustit</a>&nbsp;{{ t.name }}</h1>
+    <h1><a href="{{t.get_exam_create_url()}}" class="btn btn-large">Vytvořit</a>&nbsp;{{ t.name }}</h1>
     {% endfor %}
 {% endblock %}

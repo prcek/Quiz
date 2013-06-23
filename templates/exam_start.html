@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Test - {{e.exam_template.name}}</h1>
+	<p>Celkem {{e.question_count}} otázek, maximální čas {{e.exam_template.max_time}} minut</p>
+
+	<form method="POST">
+		<button type="submit" class="btn" id="BtnStart" name="action" value="S">START</button>
+	</form>
+	<a href="/" class="btn">Zpět na seznam testů</a>	
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+
+      </script>
+{% endblock %} 

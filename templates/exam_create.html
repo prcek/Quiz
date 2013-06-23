@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Vytvoření testu - {{et.name}}</h1>
+
+	<form method="POST">
+
+		<span class="input-append">
+			<input type="text" class="input-xlarge" placeholder="Jméno, Přijmení" name="applicant" value="">
+			<button type="submit" class="btn" id="BtnCreate" name="action" value="S">Vytvořit</button>
+		</span><br>
+
+	</form>
+	<a href="/" class="btn">Zpět na seznam testů</a>	
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+
+		$(function() {
+			$("#BtnCreate").click(function(){
+				if ($("input[name='applicant']").val() == '') {
+					blink("input[name='applicant']",3);
+					return false;
+    			}	
+			});
+		});
+
+
+      </script>
+{% endblock %} 
