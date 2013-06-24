@@ -27,7 +27,14 @@
 					<td>{{q.id}}</td>
 					<td>{{q.get_short_desc()}}</td>
 					<td>{% for a in q.answers %}
-						<div>{{ a.get_desc() }}</div>
+						<div>
+							{% if a.correct %}
+								<i class="icon-ok"></i> 
+							{% else %}
+								<i class="icon-remove"></i> 
+							{% endif %}
+							{{ a.get_desc() }}
+						</div>
 						{% endfor %}</td>
 					<td>
 						<a href="{{q.get_edit_url()}}"class="btn btn-small">editovat</a>
