@@ -3,6 +3,7 @@
 
 	<div>Celkem {{q_total}} otázek</div>
 	<div>Celkový čas {{t_total//60}} minut</div>
+	<div>Kandidát: {{e.applicant}}</div>
 	<div>Zůstatek času <span class="time" time={{t_left}}></span></div>
 	<div>otázka {{q_no}} z {{q_total}}</div>
 	<div class="progress">
@@ -14,12 +15,14 @@
     <div class="question">{{ q.description|safe }}</div>
     <div>&nbsp;</div>
     <form method="POST" id="AnsForm">
+    <input type="hidden" name="ai_id" value="{{ai.id}}">
     <input type="hidden" name="qid" value="{{q.id}}">
     <input type="hidden" name="skip" id="AnsSkip" value="False">
+    <input type="hidden" name="timeout" id="AnsTimeout" value="False">
     {% for a in q.answers %}
 		<label class="radio">
   			<input type="radio" name="ansRadios" 
-  				value="a_{{a.id}}" {% if a.selected %} checked {% endif%}>
+  				value="{{a.id}}" {% if a.id == qa_id %} checked {% endif%}>
   			{{ a.text|safe }}
 		</label>
     {% endfor %}
@@ -38,6 +41,7 @@
     	function prepare_timer(){
 			var timeout = 1000;
 			var timer;
+			var st;
 
 			var t = $(".time").attr("time");
 			$(".time").text(timeformat(t));
@@ -46,10 +50,15 @@
 					var t = $(".time").attr("time");
 					t=t-1;
 					$(".time").attr("time",t);
-					$(".time").text(timeformat(t));
-				
-					if (t<=0) {
+
+					if (t>=0) {
+						$(".time").text(timeformat(t));
+					}
+					if (t<(-2)) {
 						timer.stop();
+						$("#AnsTimeout").val("True");
+    					$("#AnsForm").submit();
+
 					}	
 			});
 

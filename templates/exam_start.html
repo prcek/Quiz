@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 	<h1>Test - {{e.exam_template.name}}</h1>
+	<h3>Kandidát: {{e.applicant}}</h3>
 	<p>Celkem {{e.question_count}} otázek, maximální čas {{e.exam_template.max_time}} minut</p>
 
 	<form method="POST">

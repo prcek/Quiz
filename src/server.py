@@ -126,13 +126,16 @@ class Exam(BaseModel):
 	def get_start_url(self):
 		return url_for('exam_start',exam_shash=self.shash)
 
+	def get_stop_url(self):
+		return url_for('exam_end',exam_shash=self.shash)
+
 	def get_result(self):
 		return "%d/%d" % (self.question_correct,self.question_count)
 
 	def get_detail_url(self):
 		return url_for('exam_detail',exam_id=self.id)
 
-	def get_questions(self):
+	def get_answers(self):
 		return [a for a in self.answers.order_by(ExamAnswer.no)]
 
 
@@ -461,6 +464,7 @@ def exam_start(exam_shash):
 			e.exam_start = datetime.datetime.now()
 			e.exam_stop = e.exam_start+datetime.timedelta(minutes=e.exam_template.max_time)
 			e.cursor = 0
+			e.closed = False
 			e.save()
 			return redirect(url_for('exam_step',exam_shash=e.shash))
 
@@ -475,18 +479,42 @@ def exam_start(exam_shash):
 def exam_step(exam_shash):
 	e = Exam.get(shash=exam_shash)
 
-
+	now = datetime.datetime.now()
+	if (now>e.exam_stop):
+		return redirect(url_for('exam_end',exam_shash=e.shash))
+	
 
 	if e.cursor == 0:
 		e.cursor = 1
 	else:
 		if request.method=='POST':
+
+			if 'ansRadios' in request.form:
+				ai_id = request.form['ai_id']
+				q_ans_id = request.form['ansRadios']
+				ea = ExamAnswer.get(id=ai_id)
+				a = Answer.get(id=q_ans_id)
+				ea.answer=a
+				ea.answer_correct = a.correct
+				ea.save()
+
+				e.last_answer_time = now
+				e.save()
+
+
 			e.cursor+=1
 			if e.cursor>e.question_count:
-				e.cursor=1
+				return redirect(url_for('exam_end',exam_shash=e.shash))
+				#e.cursor=1
 
 	e.save()
-	q = e.get_questions()[e.cursor-1].question
+	ai = e.get_answers()[e.cursor-1]
+	q=ai.question
+	if ai.answer:
+		qa_id = ai.answer.id
+	else:
+		qa_id = None
+
 	now = datetime.datetime.now()
 	if e.exam_stop > now:
 		left = e.exam_stop - now
@@ -497,7 +525,9 @@ def exam_step(exam_shash):
 
 	data = {
 		'e':e,
+		'ai':ai,
 		'q':q,
+		'qa_id':qa_id,
 		'q_no':e.cursor,
 		'q_total':e.question_count,
 		't_total':e.exam_template.max_time*60,
@@ -506,6 +536,26 @@ def exam_step(exam_shash):
 
 	return render_template('exam_step.html',**data)
 
+@app.route("/exam_end/<exam_shash>")
+def exam_end(exam_shash):
+	e = Exam.get(shash=exam_shash)
+
+	if not e.closed:
+		e.question_correct = 0
+		e.question_wrong = 0
+		for ai in e.get_answers():
+			if ai.answer:
+				if ai.answer_correct:
+					e.question_correct+=1
+				else:
+					e.question_wrong+=1
+
+		e.closed = True
+		e.save()
+	data = {
+	'e':e,
+	}
+	return render_template('exam_end.html',**data)
 
 
 @app.route("/q_preview/<int:question_id>", methods=['GET', 'POST'])

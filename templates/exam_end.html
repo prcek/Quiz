@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Test {{e.exam_template.name}} dokončen.</h1>
+	<h3>Kandidát: {{e.applicant}}</h3>
+	
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+      </script>
+{% endblock %} 
