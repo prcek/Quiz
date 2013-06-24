@@ -224,7 +224,6 @@ def load_db():
 ##### AUTH #####
 
 
-
 def check_auth(username, password):
     return username == 'admin' and password == 'secret'
 
@@ -247,9 +246,21 @@ def before_request():
 	auth = request.authorization
 	flask_g.auth = (auth and check_auth(auth.username, auth.password))
 
+
+##### AUTH VIEWS #####
+
+@app.route("/logout")
+def logout():
+	if flask_g.auth:
+		return authenticate() 
+	return redirect("/")
+
+@app.route("/login")
+@requires_auth
+def login():
+	return redirect("/")
+
 ##### VIEWS #####
-
-
 
 @app.route("/")
 def view():
