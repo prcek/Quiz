@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding:utf8
-from flask import Flask, url_for, render_template, abort, redirect, make_response, send_file, request
+from flask import Flask, url_for, render_template, abort, redirect, make_response, send_file, request, Response
 import hashlib
 import datetime
 from cStringIO import StringIO
@@ -13,10 +13,14 @@ import json
 import urllib
 import os
 
+from functools import wraps
+
 from index import app
 from index import database
 
 from peewee import *
+
+from flask import g as flask_g
 
 
 ##### MODELS #####
@@ -217,6 +221,32 @@ def load_db():
 	etq.save()
 
 
+##### AUTH #####
+
+
+
+def check_auth(username, password):
+    return username == 'admin' and password == 'secret'
+
+def authenticate():
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+    	if not flask_g.auth:
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+@app.before_request
+def before_request():
+	auth = request.authorization
+	flask_g.auth = (auth and check_auth(auth.username, auth.password))
+
 ##### VIEWS #####
 
 
@@ -229,6 +259,7 @@ def view():
 	return render_template('index.html', **data)
 
 @app.route("/templates", methods=['GET','POST'])
+@requires_auth
 def exam_templates():
 	if request.method == 'POST':
 		t = ExamTemplate.create(name=request.form['desc'],max_time=request.form['max']);
@@ -240,6 +271,7 @@ def exam_templates():
 	return render_template('templates.html',**data)
 
 @app.route("/templates/<int:exam_template_id>", methods=['GET', 'POST'])
+@requires_auth
 def exam_template_edit(exam_template_id):
 	if request.method == 'POST':
 		if request.form['action'] == 'D':
@@ -295,6 +327,7 @@ def exam_template_edit(exam_template_id):
 	return render_template('template_edit.html',**data)
 
 @app.route("/templates/erase/<int:exam_template_id>")
+@requires_auth
 def exam_template_erase(exam_template_id):
 	t =  ExamTemplate.get(id=exam_template_id)
 	t.delete_instance()
@@ -303,6 +336,7 @@ def exam_template_erase(exam_template_id):
 
 @app.route("/questions")
 @app.route("/questions/<int:category_id>", methods=['GET','POST'])
+@requires_auth
 def questions(category_id=None):
 	if category_id == None:
 		return redirect(url_for('questions', category_id=Category.get().id))
@@ -329,6 +363,7 @@ def questions(category_id=None):
 	return render_template('questions.html',**data)
 
 @app.route("/question/<int:question_id>", methods=["GET","POST"])
+@requires_auth
 def question_edit(question_id):
 
 	question = Question.get(id=question_id)
@@ -371,6 +406,7 @@ def question_edit(question_id):
 
 
 @app.route("/categories",methods=['POST','GET'])
+@requires_auth
 def categories():
 	if request.method == 'POST':
 		if request.form['action']=='NC':
@@ -384,6 +420,7 @@ def categories():
 	return render_template('categories.html', **data)
 
 @app.route("/category/<int:category_id>",methods=['POST','GET'])
+@requires_auth
 def category_edit(category_id):
 	alert = None
 	cat = Category.get(id=category_id)
@@ -408,6 +445,7 @@ def category_edit(category_id):
 	return render_template('category_edit.html', **data)
 
 @app.route("/exams")
+@requires_auth
 def exam_list():
 	data = {
 		"exams": Exam.select().order_by(-Exam.exam_created),
@@ -415,6 +453,7 @@ def exam_list():
 	return render_template('exams.html',**data)
 
 @app.route("/exam/<int:exam_id>")
+@requires_auth
 def exam_detail(exam_id):
 	e = Exam.get(id=exam_id)
 	data = {
@@ -566,6 +605,7 @@ def exam_end(exam_shash):
 
 
 @app.route("/q_preview/<int:question_id>", methods=['GET', 'POST'])
+@requires_auth
 def question_preview(question_id):
 
 #	if request.method == 'POST':

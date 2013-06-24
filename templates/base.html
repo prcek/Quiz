@@ -33,10 +33,12 @@
           <a class="brand" href="/">Quiz</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
+            {% if g.auth %}
               <li><a href="/templates">Šablony</a></li>
               <li><a href="/questions">Otázky</a></li>
               <li><a href="/categories">Kategorie</a></li>
               <li><a href="/exams">Testy</a></li>
+            {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
         </div>
