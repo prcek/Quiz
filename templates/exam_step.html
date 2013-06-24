@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+
+	<div>Celkem {{q_total}} otázek</div>
+	<div>Celkový čas {{t_total//60}} minut</div>
+	<div>Zůstatek času <span class="time" time={{t_left}}></span></div>
+	<div>otázka {{q_no}} z {{q_total}}</div>
+	<div class="progress">
+  		<div class="bar bar-success" style="width: {{(((q_no-1)*100) / q_total)|round|int}}%;"></div>
+	</div>
+	<hr/>
+	<div class="category">Sekce {{q.category.name}}</div>
+    <div>&nbsp;</div>
+    <div class="question">{{ q.description|safe }}</div>
+    <div>&nbsp;</div>
+    <form method="POST" id="AnsForm">
+    <input type="hidden" name="qid" value="{{q.id}}">
+    <input type="hidden" name="skip" id="AnsSkip" value="False">
+    {% for a in q.answers %}
+		<label class="radio">
+  			<input type="radio" name="ansRadios" 
+  				value="a_{{a.id}}" {% if a.selected %} checked {% endif%}>
+  			{{ a.text|safe }}
+		</label>
+    {% endfor %}
+    <button class="btn" type="button" id="BtnOk">Ok</button>
+    <button class="btn" type="button" id="BtnSkip">Přeskočit</button>
+	</form>
+    <div>&nbsp;</div>
+    <hr/>
+
+{% endblock %}
+
+{% block script %}
+  {{ super() }}
+    	<script type="text/javascript">
+
+    	function prepare_timer(){
+			var timeout = 1000;
+			var timer;
+
+			var t = $(".time").attr("time");
+			$(".time").text(timeformat(t));
+			
+			timer = $.timer(timeout, function() {
+					var t = $(".time").attr("time");
+					t=t-1;
+					$(".time").attr("time",t);
+					$(".time").text(timeformat(t));
+				
+					if (t<=0) {
+						timer.stop();
+					}	
+			});
+
+    	}
+
+    	function is_ans() {
+    		return ($("input[name='ansRadios']:checked").length > 0);
+    	}
+
+    	function formsave() {
+    		$("#BtnOk").attr('disabled',true);
+    		$("input[name='ansRadios']").change(function(){
+				if (is_ans()) {
+					$("#BtnOk").removeAttr('disabled');
+				} else {
+					$("#BtnOk").attr('disabled',true);
+				}
+    		});
+
+
+    		$("#BtnOk").click(function(){
+    			$("#AnsForm").submit();
+    		});
+    		$("#BtnSkip").click(function(){
+    			$("#AnsSkip").val("True");
+    			$("#AnsForm").submit();
+    		});
+
+    	}
+
+		$(function() {
+			prepare_timer();
+			formsave();
+  		});
+  	
+  	</script>
+{% endblock %}

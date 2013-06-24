@@ -132,6 +132,9 @@ class Exam(BaseModel):
 	def get_detail_url(self):
 		return url_for('exam_detail',exam_id=self.id)
 
+	def get_questions(self):
+		return [a for a in self.answers.order_by(ExamAnswer.no)]
+
 
 class ExamAnswer(BaseModel):
 	no = IntegerField()
@@ -472,7 +475,36 @@ def exam_start(exam_shash):
 def exam_step(exam_shash):
 	e = Exam.get(shash=exam_shash)
 
-	return "exam step"
+
+
+	if e.cursor == 0:
+		e.cursor = 1
+	else:
+		if request.method=='POST':
+			e.cursor+=1
+			if e.cursor>e.question_count:
+				e.cursor=1
+
+	e.save()
+	q = e.get_questions()[e.cursor-1].question
+	now = datetime.datetime.now()
+	if e.exam_stop > now:
+		left = e.exam_stop - now
+		t_left = left.seconds
+	else:
+		t_left = 0
+
+
+	data = {
+		'e':e,
+		'q':q,
+		'q_no':e.cursor,
+		'q_total':e.question_count,
+		't_total':e.exam_template.max_time*60,
+		't_left':t_left,
+	}
+
+	return render_template('exam_step.html',**data)
 
 
 

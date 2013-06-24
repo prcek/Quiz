@@ -69,6 +69,17 @@
         });
       }
 
+      function pad(n) {
+        return (n < 10) ? ("0" + n) : n;
+      }
+    
+      function timeformat(t){
+        var hours = Math.floor(t/(3600));
+        var minutes = Math.floor( (t-hours*3600)/60);
+        var seconds = t-hours*3600-minutes*60;
+        return pad(hours)+":"+pad(minutes)+":"+pad(seconds); 
+      }
+
 
       $(function() {
       });
