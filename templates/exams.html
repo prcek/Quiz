@@ -16,7 +16,7 @@
 					<td>{{e.exam_template.name}}</td>
 					<td>{% if e.closed %} {{e.get_result()}} {% else %} nedokončen {%endif%}</td>
 					<td>
-						<a href="{{e.get_detail_url()}}" class="btn btn-small">detail</a>
+						<a href="{{e.get_detail_url()}}" class="btn btn-small">náhled</a>
 						<a href="{{e.get_start_url()}}" class="btn btn-small">znovu spuštění</a>
 						{% if not e.closed %}<a href="{{e.get_stop_url()}}" class="btn btn-small">uzavřít</a>{% endif %}
 					</td>

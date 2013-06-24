@@ -121,6 +121,8 @@ class Exam(BaseModel):
 	def get_date(self):
 		return self.exam_created.strftime("%Y-%m-%d %H:%M")
 
+
+
 	def get_key(self):
 		return self.shash+"_"+self.id
 	def get_start_url(self):
@@ -414,7 +416,12 @@ def exam_list():
 
 @app.route("/exam/<int:exam_id>")
 def exam_detail(exam_id):
-	return ""
+	e = Exam.get(id=exam_id)
+	data = {
+		"e":e,
+	}
+
+	return render_template('exam_detail.html',**data)
 
 @app.route("/exam_create/<int:exam_template_id>", methods=['GET', 'POST'])
 def exam_create(exam_template_id):

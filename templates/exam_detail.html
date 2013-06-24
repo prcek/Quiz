@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Náhled testu {{e.exam_template.name}}</h1>
+	<h3>Kandidát: {{e.applicant}}</h3>
+	<p>Datum: {{e.get_date()}}</p>
+	{%if e.closed %}
+		<p>celkem otázek: {{e.question_count}}</p>
+		<p>správně: {{e.question_correct}}</p>
+		<p>špatně: {{e.question_wrong}}</p>
+		<p>vynecháno: {{e.question_count - (e.question_correct+e.question_wrong)}}</p>
+	{%else%}
+		<p>test není dokončen</p>
+	{%endif%}
+
+
+			<table class="table table-hover">
+			<thead>
+				<tr><th></th><th>#</th><th>kategorie</th><th>otázka</th><th>odpověď</th></tr>
+			</thead>
+			<tbody>
+
+				{% for a in e.get_answers() %}
+				<tr>
+					<td>
+						{% if a.answer %} 
+							{% if a.answer_correct %}
+						 		<i class="icon-ok"></i> 
+						 	{% else %}
+						 		<i class="icon-remove"></i>
+						    {% endif %}		
+						{%else%} 
+							&nbsp;<strong>?</strong>
+						{%endif%}
+					</td>
+					<td>{{a.no}}</td>
+					<td>{{a.question.category.name}}</td>
+					<td>{{a.question.get_desc()}}</td>
+					<td>{% if a.answer %} {{a.answer.text}} {%else%} &nbsp; {%endif%}</td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+			</table>
+
+	
+{% endblock %}
+
+
+{% block script %}
+{{ super() }}
+      <script type="text/javascript">
+
+      </script>
+{% endblock %} 
